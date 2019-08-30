@@ -1,0 +1,134 @@
+---
+title: "Analysis of Goodreads data on Kaggle"
+output: html_notebook
+author:
+  - name: Hoang Anh NGO
+  - affiliation: Ecole Polytechnique, IP Paris
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library("RColorBrewer")
+library("viridis")  
+```
+
+
+```{r}
+goodreads <- read.csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/booksFIXED.csv', stringsAsFactors = FALSE)
+str(goodreads)
+head(goodreads)
+```
+
+```{r}
+goodreads[goodreads=='J.K. Rowling-Mary GrandPré'] <- 'J.K. Rowling'
+head(goodreads)
+for(i in c(4,8)) {
+  goodreads[,i] <- as.numeric(goodreads[,i])
+}
+names(goodreads)[names(goodreads) == "X..num_pages"] <- "num_pages"
+goodreads <- na.omit(goodreads)
+str(goodreads)  
+
+```
+
+Column names' description
+- **bookID**: the unique ID for each book/series
+- **title**: the title of each book/series
+- **authors**: the author(s) of the particular book/series
+- **average_rating**: the average ratings of the particular book/series, given by Goodreads' users
+- **ISBN**: old ISBN number of 10 digits, including information about a book/series, for example name, author(s), publisher, genre, etc.
+- **ISBN13**: new ISBN number of 13 digits, introduced in 2007
+- **Language_code**: 3-character language code, which indicates the language in which the book is written
+- **Num_page**: number of pages of each book/series
+- **Ratings_count**: number of ratings given by users for each book/series
+- **Text_reviews_count**: number of text reviews (apart from point reviews of scale 5) given by users for each book/series
+
+```{r}
+book_frequency <- data.frame(table(goodreads$title), stringsAsFactors = FALSE)
+names(book_frequency) <- c('title','frequency')
+book_frequency <- book_frequency[order(-book_frequency$frequency),] 
+head(book_frequency)
+
+book_frequency_top20 <- book_frequency[c(1:20),]
+ggplot(data=book_frequency_top20, aes(x=reorder(title, frequency),y=frequency, fill = factor(c(1:nrow(book_frequency_top20))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle('20 books with highest frequency') + 
+  labs(x = "Title", y = "Frequency") 
+```
+
+```{r}
+book_language <- data.frame(table(goodreads$language_code), stringsAsFactors = FALSE)
+names(book_language) <- c('language','frequency')
+book_language <- book_language[order(-book_language$frequency),] 
+head(book_language)
+
+ggplot(book_language, aes(x=language,y=frequency, fill = factor(c(1:nrow(book_language))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  ggtitle('Languages written in books/series') + 
+  labs(x = "Language", y = "Total number of books") +
+  geom_text(aes(label=frequency), vjust=-0.5)
+```
+
+```{r}
+book_ratings_count <- goodreads[order(-goodreads$ratings_count),]
+
+book_ratings_count_top10 <- book_ratings_count[c(1:10),]
+book_ratings_count_top10
+ggplot(data=book_ratings_count_top10, aes(x=reorder(title, ratings_count),y=ratings_count, fill = factor(c(1:nrow(book_ratings_count_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Paired") + 
+  ggtitle('Books/series with highest number of written ratings') + 
+  labs(x = "Book/series", y = "Number of ratings") +
+  geom_text(
+    aes(label = ratings_count), colour = "black",
+    hjust = -0.1, size = 2,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+```
+
+
+```{r}
+author_most_books <- data.frame(table(goodreads$authors), stringsAsFactors = FALSE)
+names(author_most_books) <- c('author','total_number_of_books')
+author_most_books <- author_most_books[order(-author_most_books$total_number_of_books),] 
+head(author_most_books)
+
+author_most_books_top10 <- author_most_books[c(1:10),]
+ggplot(data=author_most_books_top10, aes(x=reorder(author, total_number_of_books),y=total_number_of_books, fill = factor(c(1:nrow(author_most_books_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Set3") + 
+  ggtitle('Author with greatest number of books appeared') + 
+  labs(x = "Author", y = "Total number of books") +
+  geom_text(
+    aes(label = total_number_of_books), colour = "black",
+    hjust = -0.5, size = 3,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+author_most_books_top10
+```
+
+```{r}
+ggplot(data = goodreads, aes(x = goodreads$average_rating)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='lightgreen', fill='lightgreen') +
+    geom_density(colour="red", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for average ") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+#bảng stats, finish hình thức cho histogram
+```
+
