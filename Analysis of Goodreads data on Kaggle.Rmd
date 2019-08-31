@@ -67,7 +67,8 @@ ggplot(data=book_frequency_top20, aes(x=reorder(title, frequency),y=frequency, f
 ```{r}
 book_language <- data.frame(table(goodreads$language_code), stringsAsFactors = FALSE)
 names(book_language) <- c('language','frequency')
-book_language <- book_language[order(-book_language$frequency),] 
+book_language <- book_language[order(-book_language$frequency),]
+book_language$percentage <- round(book_language$frequency/nrow(goodreads)*100, digits = 2)
 head(book_language)
 
 ggplot(book_language, aes(x=reorder(language,-frequency),y=frequency, fill = factor(c(1:nrow(book_language))))) +
@@ -101,6 +102,31 @@ author_most_book_ratings_count <- data.frame(table(book_ratings_count_top10$auth
 names(author_most_book_ratings_count) <- c('author', 'number_of_books')
 author_most_book_ratings_count <- author_most_book_ratings_count[order(-author_most_book_ratings_count$number_of_books),]
 author_most_book_ratings_count
+```
+
+```{r}
+book_text_reviews_count <- goodreads[order(-goodreads$text_reviews_count),]
+
+book_text_reviews_count_top10 <- book_text_reviews_count[c(1:10),]
+book_text_reviews_count_top10
+ggplot(data=book_text_reviews_count_top10, aes(x=reorder(title, text_reviews_count),y=text_reviews_count, fill = factor(c(1:nrow(book_text_reviews_count_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Paired") + 
+  ggtitle('Books/series with highest number of text reviews') + 
+  labs(x = "Book/series", y = "Number of text reviews") +
+  geom_text(
+    aes(label = text_reviews_count), colour = "black",
+    hjust = -0.1, size = 2,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+author_most_book_text_reviews_count <- data.frame(table(book_text_reviews_count_top10$authors))
+names(author_most_book_text_reviews_count) <- c('author', 'number_of_books')
+author_most_book_text_reviews_count <- author_most_book_text_reviews_count[order(-author_most_book_text_reviews_count$number_of_books),]
+author_most_book_text_reviews_count
 ```
 
 
@@ -158,8 +184,8 @@ ggplot(data=author_most_books_high_ratings_top10, aes(x=reorder(author, `number_
   geom_bar(stat="identity") +
   coord_flip() +
   scale_fill_brewer(palette="Set3") + 
-  ggtitle('Author with greatest number of highly ranked books') + 
-  labs(x = "Author", y = "Total number of highly ranked books") +
+  ggtitle('Author with greatest number of books ranked >= 4.0') + 
+  labs(x = "Author", y = "Total number of highly books ranked >= 4.0") +
   geom_text(
     aes(label = `number_of_books_>=_4.0`), colour = "black",
     hjust = -0.5, size = 3,
@@ -173,8 +199,8 @@ ggplot(data=author_most_books_high_ratings_top10_2, aes(x=reorder(author, `numbe
   geom_bar(stat="identity") +
   coord_flip() +
   scale_fill_brewer(palette="Set3") + 
-  ggtitle('Author with greatest number of highly ranked books') + 
-  labs(x = "Author", y = "Total number of highly ranked books") +
+  ggtitle('Author with greatest number of books ranked >= 4.3') + 
+  labs(x = "Author", y = "Total number of books ranked >= 4.3") +
   geom_text(
     aes(label = `number_of_books_>=_4.3`), colour = "black",
     hjust = -0.5, size = 3,
@@ -188,8 +214,8 @@ ggplot(data=author_most_books_high_ratings_top10_3, aes(x=reorder(author, `numbe
   geom_bar(stat="identity") +
   coord_flip() +
   scale_fill_brewer(palette="Set3") + 
-  ggtitle('Author with greatest number of highly ranked books') + 
-  labs(x = "Author", y = "Total number of highly ranked books") +
+  ggtitle('Author with greatest number of books ranked >= 4.5') + 
+  labs(x = "Author", y = "Total number of books ranked >= 4.5") +
   geom_text(
     aes(label = `number_of_books_>=_4.5`), colour = "black",
     hjust = -0.5, size = 3,
@@ -209,6 +235,8 @@ ggplot(data = goodreads, aes(x = goodreads$average_rating)) +
     geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
     labs(title="Histogram for average ") + 
     geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+print(paste('The mean of average ratings of all books is',round(mean(goodreads$average_rating, na.rm = TRUE),digits = 3),', rounded to 3 decimal digits'))
 
 #bảng stats, finish hình thức cho histogram
 ```
