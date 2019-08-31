@@ -70,7 +70,7 @@ names(book_language) <- c('language','frequency')
 book_language <- book_language[order(-book_language$frequency),] 
 head(book_language)
 
-ggplot(book_language, aes(x=language,y=frequency, fill = factor(c(1:nrow(book_language))))) +
+ggplot(book_language, aes(x=reorder(language,-frequency),y=frequency, fill = factor(c(1:nrow(book_language))))) +
   theme(legend.position = "none") + 
   geom_bar(stat="identity") +
   ggtitle('Languages written in books/series') + 
@@ -88,7 +88,7 @@ ggplot(data=book_ratings_count_top10, aes(x=reorder(title, ratings_count),y=rati
   geom_bar(stat="identity") +
   coord_flip() +
   scale_fill_brewer(palette="Paired") + 
-  ggtitle('Books/series with highest number of written ratings') + 
+  ggtitle('Books/series with highest number of ratings') + 
   labs(x = "Book/series", y = "Number of ratings") +
   geom_text(
     aes(label = ratings_count), colour = "black",
@@ -96,6 +96,11 @@ ggplot(data=book_ratings_count_top10, aes(x=reorder(title, ratings_count),y=rati
     position = position_dodge(width = 1),
     inherit.aes = TRUE
   )
+
+author_most_book_ratings_count <- data.frame(table(book_ratings_count_top10$authors))
+names(author_most_book_ratings_count) <- c('author', 'number_of_books')
+author_most_book_ratings_count <- author_most_book_ratings_count[order(-author_most_book_ratings_count$number_of_books),]
+author_most_book_ratings_count
 ```
 
 
@@ -120,36 +125,88 @@ ggplot(data=author_most_books_top10, aes(x=reorder(author, total_number_of_books
     inherit.aes = TRUE
   )
 
+author_most_books_top10
+
 ```
 
+##What are the authors with the greatest number of highly-ranked books?
+The definition of "highly-ranked books" in this context is relative. As such, we consider some of the following cases. We define a book to be highly-ranked if its average ranking is greater than:
+  - 4.0
+  - 4.3
+  - 4.5
+  
+
 ```{r}
-book_high_ratings <- goodreads[goodreads$average_rating >= 4.3,]
-author_most_books_high_ratings <- data.frame(table(book_high_ratings$authors), stringsAsFactors = FALSE)
-names(author_most_books_high_ratings) <- c('author','number_of_books_high_ratings')
-author_most_books_high_ratings <- author_most_books_high_ratings[order(-author_most_books_high_ratings$number_of_books_high_ratings),] 
-head(author_most_books_high_ratings)
+author_most_book_high_ratings <- goodreads[goodreads$average_rating >= 4.0,]
+author_most_books_high_ratings <- data.frame(table(author_most_book_high_ratings$authors), stringsAsFactors = FALSE)
+names(author_most_books_high_ratings) <- c('author','number_of_books_>=_4.0')
+author_most_books_high_ratings <- author_most_books_high_ratings[order(-author_most_books_high_ratings$`number_of_books_>=_4.0`),] 
+
+author_most_book_high_ratings_2 <- goodreads[goodreads$average_rating >= 4.3,]
+author_most_books_high_ratings_2 <- data.frame(table(author_most_book_high_ratings_2$authors), stringsAsFactors = FALSE)
+names(author_most_books_high_ratings_2) <- c('author','number_of_books_>=_4.3')
+author_most_books_high_ratings_2 <- author_most_books_high_ratings_2[order(-author_most_books_high_ratings_2$`number_of_books_>=_4.3`),] 
+
+author_most_book_high_ratings_3 <- goodreads[goodreads$average_rating >= 4.5,]
+author_most_books_high_ratings_3 <- data.frame(table(author_most_book_high_ratings_3$authors), stringsAsFactors = FALSE)
+names(author_most_books_high_ratings_3) <- c('author','number_of_books_>=_4.5')
+author_most_books_high_ratings_3 <- author_most_books_high_ratings_3[order(-author_most_books_high_ratings_3$`number_of_books_>=_4.5`),] 
 
 author_most_books_high_ratings_top10 <- author_most_books_high_ratings[c(1:10),]
-ggplot(data=author_most_books_high_ratings_top10, aes(x=reorder(author, number_of_books_high_ratings),y=number_of_books_high_ratings, fill = factor(c(1:nrow(author_most_books_high_ratings_top10))))) +
+ggplot(data=author_most_books_high_ratings_top10, aes(x=reorder(author, `number_of_books_>=_4.0`),y=`number_of_books_>=_4.0`, fill = factor(c(1:nrow(author_most_books_high_ratings_top10))))) +
   theme(legend.position = "none") + 
   geom_bar(stat="identity") +
   coord_flip() +
   scale_fill_brewer(palette="Set3") + 
-  ggtitle('Author with greatest number of books appeared') + 
-  labs(x = "Author", y = "Total number of books") +
+  ggtitle('Author with greatest number of highly ranked books') + 
+  labs(x = "Author", y = "Total number of highly ranked books") +
   geom_text(
-    aes(label = number_of_books_high_ratings), colour = "black",
+    aes(label = `number_of_books_>=_4.0`), colour = "black",
     hjust = -0.5, size = 3,
     position = position_dodge(width = 1),
     inherit.aes = TRUE
   )
+
+author_most_books_high_ratings_top10_2 <- author_most_books_high_ratings_2[c(1:10),]
+ggplot(data=author_most_books_high_ratings_top10_2, aes(x=reorder(author, `number_of_books_>=_4.3`),y=`number_of_books_>=_4.3`, fill = factor(c(1:nrow(author_most_books_high_ratings_top10_2))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Set3") + 
+  ggtitle('Author with greatest number of highly ranked books') + 
+  labs(x = "Author", y = "Total number of highly ranked books") +
+  geom_text(
+    aes(label = `number_of_books_>=_4.3`), colour = "black",
+    hjust = -0.5, size = 3,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+author_most_books_high_ratings_top10_3 <- author_most_books_high_ratings_3[c(1:10),]
+ggplot(data=author_most_books_high_ratings_top10_3, aes(x=reorder(author, `number_of_books_>=_4.5`),y=`number_of_books_>=_4.5`, fill = factor(c(1:nrow(author_most_books_high_ratings_top10_3))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Set3") + 
+  ggtitle('Author with greatest number of highly ranked books') + 
+  labs(x = "Author", y = "Total number of highly ranked books") +
+  geom_text(
+    aes(label = `number_of_books_>=_4.5`), colour = "black",
+    hjust = -0.5, size = 3,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+x <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_books_high_ratings_top10,author_most_books_high_ratings_top10_2,author_most_books_high_ratings_top10_3))
+
+x
 ```
 
 
 ```{r}
 ggplot(data = goodreads, aes(x = goodreads$average_rating)) + 
-    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='yellow', fill='yellow') +
-    geom_density(colour="red", lwd = 0.5, alpha=0.5) + 
+    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='orange', fill='orange') +
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
     labs(title="Histogram for average ") + 
     geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
 
