@@ -15,11 +15,12 @@ library(ggplot2)
 library(dplyr)
 library("RColorBrewer")
 library("viridis")  
+library(WVPlots)
 ```
 
 
 ```{r}
-goodreads <- read.csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/booksFIXED.csv', stringsAsFactors = FALSE)
+goodreads <- read.csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/books.csv', stringsAsFactors = FALSE)
 str(goodreads)
 head(goodreads)
 ```
@@ -119,16 +120,46 @@ ggplot(data=author_most_books_top10, aes(x=reorder(author, total_number_of_books
     inherit.aes = TRUE
   )
 
-author_most_books_top10
 ```
 
 ```{r}
+book_high_ratings <- goodreads[goodreads$average_rating >= 4.3,]
+author_most_books_high_ratings <- data.frame(table(book_high_ratings$authors), stringsAsFactors = FALSE)
+names(author_most_books_high_ratings) <- c('author','number_of_books_high_ratings')
+author_most_books_high_ratings <- author_most_books_high_ratings[order(-author_most_books_high_ratings$number_of_books_high_ratings),] 
+head(author_most_books_high_ratings)
+
+author_most_books_high_ratings_top10 <- author_most_books_high_ratings[c(1:10),]
+ggplot(data=author_most_books_high_ratings_top10, aes(x=reorder(author, number_of_books_high_ratings),y=number_of_books_high_ratings, fill = factor(c(1:nrow(author_most_books_high_ratings_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Set3") + 
+  ggtitle('Author with greatest number of books appeared') + 
+  labs(x = "Author", y = "Total number of books") +
+  geom_text(
+    aes(label = number_of_books_high_ratings), colour = "black",
+    hjust = -0.5, size = 3,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+```
+
+
+```{r}
 ggplot(data = goodreads, aes(x = goodreads$average_rating)) + 
-    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='lightgreen', fill='lightgreen') +
+    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='yellow', fill='yellow') +
     geom_density(colour="red", lwd = 0.5, alpha=0.5) + 
     labs(title="Histogram for average ") + 
     geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
 
 #bảng stats, finish hình thức cho histogram
+```
+
+```{r}
+ScatterHist(goodreads, "average_rating", "ratings_count", title = "abc", binwidth_x = 0.01, binwidth_y = 100) +
+  scale_fill_manual("red") + 
+  labs(x = 'Average rating', y = "Number of ratings")
+  
 ```
 
