@@ -15,8 +15,8 @@ First, we will load all the necessary libraries for this notebook.
 ```{r}
 library(ggplot2)
 library(dplyr)
-library("RColorBrewer")
-library("viridis")  
+library(RColorBrewer)
+library(viridis)  
 library(WVPlots)
 library(naniar)
 ```
