@@ -1,9 +1,9 @@
 ---
 title: "Analysis of Goodreads data on Kaggle"
-output: html_notebook
 author:
   - name: Hoang Anh NGO
   - affiliation: Ecole Polytechnique, IP Paris
+output: html_notebook
 ---
 
 #Loading libraries and understanding the basics of this dataset
@@ -18,6 +18,7 @@ library(dplyr)
 library("RColorBrewer")
 library("viridis")  
 library(WVPlots)
+library(naniar)
 ```
 
 ##Understanding the basic structure of the dataset
@@ -64,6 +65,17 @@ After fixing all the errors appeared in the dataset, we start to define the vari
   - **Num_page**: number of pages of each book/series
   - **Ratings_count**: number of ratings given by users for each book/series
   - **Text_reviews_count**: number of text reviews (apart from point reviews of scale 5) given by users for each book/series
+  
+##Missingness of data
+We investigate whether there is any data cell missing with the vis_miss plot. Since we do not plot any significant in the plot, and it shows that less than 0.1% of the data is missing, we use gg_miss_var to get the exact number of data cells missing in each column. The result is, surprisingly, there is no data misising.
+  
+```{r}
+vis_miss(goodreads)
+gg_miss_var(goodreads)
+
+```
+  
+#Exploratory Data Analysis (EDA) of this dataset
 
 ```{r}
 book_frequency <- data.frame(table(goodreads$title), stringsAsFactors = FALSE)
@@ -257,7 +269,7 @@ ggplot(data = goodreads, aes(x = goodreads$average_rating)) +
 ```
 
 ```{r}
-ScatterHist(goodreads, "average_rating", "ratings_count", title = "abc", binwidth_x = 0.01, binwidth_y = 100) +
+ScatterHist(goodreads, "average_rating", "text_reviews_count", title = "abc", binwidth_x = 0.01, binwidth_y = 100) +
   scale_fill_manual("red") + 
   labs(x = 'Average rating', y = "Number of ratings")
   
