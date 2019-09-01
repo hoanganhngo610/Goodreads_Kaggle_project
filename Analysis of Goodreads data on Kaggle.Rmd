@@ -6,9 +6,11 @@ author:
   - affiliation: Ecole Polytechnique, IP Paris
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+#Loading libraries and understanding the basics of this dataset
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+##Loading libraries
+
+First, we will load all the necessary libraries for this notebook.
 
 ```{r}
 library(ggplot2)
@@ -18,12 +20,26 @@ library("viridis")
 library(WVPlots)
 ```
 
+##Understanding the basic structure of the dataset
+
+We import and investigate the structure of the dataset.
 
 ```{r}
 goodreads <- read.csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/books.csv', stringsAsFactors = FALSE)
 str(goodreads)
 head(goodreads)
+print(paste('The original goodreads book dataset has',nrow(goodreads),'rows and',ncol(goodreads),'columns.'))
 ```
+
+##Fixing problems of the dataset
+
+First of all, we know that this dataset has 13724 observations with 10 variables. There is one variable that is supposed to be written as "# num_pages". However, as R cannot read special characters in column names, for the sake of convenience, we rename this variable as "num_pages". 
+
+We obverse some problems with this dataset. At columns 4 and 8 (corresponding to variables "average_rating" and "num_page"), we can see that the observations are of type "character", while they should be of type "integer". We fix the problem with the function as.numeric in the following code chunk.
+
+However, while fixing the problem above, those two columns yield some NA values. This can be due to those rows having too many commas, forcing the values that should belong to one columns move to another column. We omit these outliers for a clean dataset by using the function na.omit. 
+
+Moreover, one of the famous authors that we know, J.K Rowling, has a fairly long name of "J.K Rowling-Mary GrandPré". After changing the author's name, we have the dataset available for further analysis.
 
 ```{r}
 goodreads[goodreads=='J.K. Rowling-Mary GrandPré'] <- 'J.K. Rowling'
@@ -34,20 +50,20 @@ for(i in c(4,8)) {
 names(goodreads)[names(goodreads) == "X..num_pages"] <- "num_pages"
 goodreads <- na.omit(goodreads)
 str(goodreads)  
-
+print(paste('The final goodreads book dataset has',nrow(goodreads),'rows and',ncol(goodreads),'columns.'))
 ```
 
-Column names' description
-- **bookID**: the unique ID for each book/series
-- **title**: the title of each book/series
-- **authors**: the author(s) of the particular book/series
-- **average_rating**: the average ratings of the particular book/series, given by Goodreads' users
-- **ISBN**: old ISBN number of 10 digits, including information about a book/series, for example name, author(s), publisher, genre, etc.
-- **ISBN13**: new ISBN number of 13 digits, introduced in 2007
-- **Language_code**: 3-character language code, which indicates the language in which the book is written
-- **Num_page**: number of pages of each book/series
-- **Ratings_count**: number of ratings given by users for each book/series
-- **Text_reviews_count**: number of text reviews (apart from point reviews of scale 5) given by users for each book/series
+After fixing all the errors appeared in the dataset, we start to define the variables' names. Their description is as follow:
+  - **bookID**: the unique ID for each book/series
+  - **title**: the title of each book/series
+  - **authors**: the author(s) of the particular book/series
+  - **average_rating**: the average ratings of the particular book/series, given by Goodreads' users
+  - **ISBN**: old ISBN number of 10 digits, including information about a book/series, for example name, author(s), publisher, genre, etc.
+  - **ISBN13**: new ISBN number of 13 digits, introduced in 2007
+  - **Language_code**: 3-character language code, which indicates the language in which the book is written
+  - **Num_page**: number of pages of each book/series
+  - **Ratings_count**: number of ratings given by users for each book/series
+  - **Text_reviews_count**: number of text reviews (apart from point reviews of scale 5) given by users for each book/series
 
 ```{r}
 book_frequency <- data.frame(table(goodreads$title), stringsAsFactors = FALSE)
@@ -233,10 +249,9 @@ x
 ggplot(data = goodreads, aes(x = goodreads$average_rating)) + 
     geom_histogram(aes(y = ..density..),binwidth = 0.01, color='orange', fill='orange') +
     geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
-    labs(title="Histogram for average ") + 
+    labs(title="Histogram for books' average ratings", x = "Average ratings", y = "Number of books") + 
     geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
 
-print(paste('The mean of average ratings of all books is',round(mean(goodreads$average_rating, na.rm = TRUE),digits = 3),', rounded to 3 decimal digits'))
 
 #bảng stats, finish hình thức cho histogram
 ```
