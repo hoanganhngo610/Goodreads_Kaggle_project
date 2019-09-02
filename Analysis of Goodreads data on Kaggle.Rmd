@@ -19,6 +19,8 @@ library(RColorBrewer)
 library(viridis)  
 library(WVPlots)
 library(naniar)
+library(e1071)
+library(plotrix)
 ```
 
 ##Understanding the basic structure of the dataset
@@ -75,7 +77,130 @@ gg_miss_var(goodreads)
 
 ```
   
-#Exploratory Data Analysis (EDA) of this dataset
+#Exploratory Data Analysis (EDA) of the dataset Goodreads
+
+In this part, we will answer some of the interesting exploratory questions by visualizing data.
+
+##Histogram plot of numerical variables
+
+First, we will plot the histograms of the numerical/integer variables, including average_rating, num_pages, ratings_count and text_reviews_count. 
+
+```{r}
+ggplot(data = goodreads, aes(x = goodreads$average_rating)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='orange', fill='orange') +
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for books' average ratings", x = "Average ratings", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+ggplot(data = goodreads, aes(x = goodreads$num_pages)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 10, color='orange', fill='orange') +
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for books' number of pages", x = "Number of pages", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+ggplot(data = goodreads, aes(x = goodreads$ratings_count)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 100, color='orange', fill='orange') +
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for ratings count of each book/series", x = "Ratings count", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+ggplot(data = goodreads, aes(x = goodreads$text_reviews_count)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 50 , color='orange', fill='orange') +
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for text reviews count for each book/series", x = "Text reviews count", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+```
+
+The histogram of average_ratings shows that most of the ratings lie between 3 and 5. The distribution of ratings between 3 and 5 seems to be familiar to a normal distribution (i.e most of the ratings focus around 4, and the density decreases upon reaching the edges). Later, we will investigate this distribution and test how close is it to the normal distribution.
+
+With the histogram of num_pages, most of the books have less than 1000 pages, with many of them having 250-500 pages. Later, we will also zoom into this part of the histogram to have a closer look of the distribution.
+
+The histograms of ratings_count and text_reviews_count is so much heavily skewed to the left that we can only see a straight small bar at the position 0, and the density curve decreases to 0 shortly. As such, to further investigate the distribution of these variables, we have to later take a closer look at the positions around 0. 
+
+##Basic statistics of numerical variables
+
+First, as R does not have a built in function to calculate the mode of a dataset, we proceed to define that function ourselves as follow.
+
+```{r}
+# Define the function getmode in R to get the mode of data (appearance with highest frequency)
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+```
+
+Now, we will generate a table of basic properties of each variable.
+
+```{r}
+basic_statistics_goodreads <- data.frame(matrix(NA, ncol = 13, nrow = 10))
+names(basic_statistics_goodreads) <- c('Variable',
+                             'Minimum score',
+                             '25th percentile',
+                             'Median',
+                             'Mean score',
+                             '75th percentile',
+                             'Maximum score',
+                             'Value with highest frequency (mode)',
+                             'Frequency of mode',
+                             'Standard Deviation',
+                             'SE Mean',
+                             'Skewness',
+                             'Kurtosis')
+
+for(i in c(4,8:10)) {
+  basic_statistics_goodreads[i,1] <- colnames(goodreads)[i]
+  basic_statistics_goodreads[i,2] <- min(goodreads[,i], na.rm = TRUE)
+  basic_statistics_goodreads[i,3] <- quantile(goodreads[,i], 0.25, na.rm = TRUE)
+  basic_statistics_goodreads[i,4] <- quantile(goodreads[,i], 0.5, na.rm = TRUE)
+  basic_statistics_goodreads[i,5] <- mean(goodreads[,i], na.rm = TRUE)
+  basic_statistics_goodreads[i,6] <- quantile(goodreads[,i], 0.75, na.rm = TRUE)
+  basic_statistics_goodreads[i,7] <- max(goodreads[,i], na.rm = TRUE)
+  basic_statistics_goodreads[i,8] <- getmode(na.omit(goodreads[,i]))
+  basic_statistics_goodreads[i,9] <- sum(goodreads[,i] == basic_statistics_goodreads[i,8])
+  basic_statistics_goodreads[i,10] <- sd(goodreads[,i], na.rm = TRUE)
+  basic_statistics_goodreads[i,11] <- std.error(goodreads[,i], na.rm = TRUE)
+  basic_statistics_goodreads[i,12] <- skewness(goodreads[,i], na.rm = TRUE)
+  basic_statistics_goodreads[i,13] <- kurtosis(goodreads[,i], na.rm = TRUE)
+}
+
+basic_statistics_goodreads <- na.omit(basic_statistics_goodreads)
+View(basic_statistics_goodreads)
+```
+
+First of all, we see an interesting fact that the mode of text_reviews_count is 0 (more than 900 books receive 0 text reviews), which means that books having 0 text reviews occur the most frequently in the dataset. Moreover, the mode of average_ratings is also exactly 4.0, which shows that readers are really generous with the books they are reading.
+
+Among the 4 variables, there is only one variable (average_ratings) that has a negative skewness. This is due to the fact that the histogram of this variable skews heavily to the right, with most of the observations lie between 3 and 5. The three remaining variables has a significantly positive skewness, which means that these variables skew heavily to the left. This can be verified by looking at the histograms of these variables.
+
+We also note that the 75th percentile of each variable, apart from average_ratings, is relatively very small comparing to the maximum, which can also explain the positive skewness of those variables.
+
+All 4 variables have a positive kurtosis, which shows that the distribution of these variables have heavier tails than the normal distribution with the same mean and standard deviation. 
+
+From the properties witnessed above, to better understand the distribution of variables within specific ranges, we again generate histograms for two variables, ratings_count and text_reviews_count. This time, we will set the limit of the x-axis to be 100 for num_pages, 5000 for ratings_count and 500 for text_reviews_count.
+
+```{r}
+ggplot(data = goodreads, aes(x = goodreads$num_pages)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 20, color='orange', fill='orange') +
+    xlim(c(0,1000)) + 
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for books' number of pages", x = "Number of pages", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+ggplot(data = goodreads, aes(x = goodreads$ratings_count)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 10, color='orange', fill='orange') +
+    xlim(c(0,5000)) + 
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for ratings count of each book/series", x = "Ratings count", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+
+ggplot(data = goodreads, aes(x = goodreads$text_reviews_count)) + 
+    geom_histogram(aes(y = ..density..),binwidth = 1 , color='orange', fill='orange') +
+    xlim(c(0,500)) + 
+    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
+    labs(title="Histogram for text reviews count for each book/series", x = "Text reviews count", y = "Number of books") + 
+    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
+```
+
+##Books with the most occurences in the dataset
 
 ```{r}
 book_frequency <- data.frame(table(goodreads$title), stringsAsFactors = FALSE)
@@ -91,6 +216,10 @@ ggplot(data=book_frequency_top20, aes(x=reorder(title, frequency),y=frequency, f
   ggtitle('20 books with highest frequency') + 
   labs(x = "Title", y = "Frequency") 
 ```
+
+Above, we have plotted the 20 books with the most appearances in the dataset. We can see that "One Hundred Year of Solitude" and "Salem's Lot" are the two books appearing the most, with 11 times for each book.
+
+These books are published again and again, each time with another publisher. This shows that these are still in great demand, despite the flow of time.
 
 ```{r}
 book_language <- data.frame(table(goodreads$language_code), stringsAsFactors = FALSE)
@@ -254,18 +383,6 @@ ggplot(data=author_most_books_high_ratings_top10_3, aes(x=reorder(author, `numbe
 x <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_books_high_ratings_top10,author_most_books_high_ratings_top10_2,author_most_books_high_ratings_top10_3))
 
 x
-```
-
-
-```{r}
-ggplot(data = goodreads, aes(x = goodreads$average_rating)) + 
-    geom_histogram(aes(y = ..density..),binwidth = 0.01, color='orange', fill='orange') +
-    geom_density(colour="blue", lwd = 0.5, alpha=0.5) + 
-    labs(title="Histogram for books' average ratings", x = "Average ratings", y = "Number of books") + 
-    geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
-
-
-#bảng stats, finish hình thức cho histogram
 ```
 
 ```{r}
