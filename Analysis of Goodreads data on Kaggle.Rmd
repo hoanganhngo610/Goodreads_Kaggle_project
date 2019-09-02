@@ -204,7 +204,7 @@ ggplot(data = goodreads, aes(x = goodreads$text_reviews_count)) +
 
 ```{r}
 rating_distribution_goodreads <- data.frame(matrix(0, ncol = 3, nrow = 5))
-names(rating_distribution_goodreads) <- c('',
+names(rating_distribution_goodreads) <- c('Range',
                              'number_of_books',
                              'percentage')
 
