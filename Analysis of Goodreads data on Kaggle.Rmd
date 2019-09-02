@@ -200,6 +200,42 @@ ggplot(data = goodreads, aes(x = goodreads$text_reviews_count)) +
     geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
 ```
 
+##Rating distribustion of books in the dataset
+
+```{r}
+rating_distribution_goodreads <- data.frame(matrix(0, ncol = 3, nrow = 5))
+names(rating_distribution_goodreads) <- c('',
+                             'number_of_books',
+                             'percentage')
+
+for(i in c(1:5)) {
+  rating_distribution_goodreads[i,1] <- paste('Between',i-1,'and',i)
+}
+
+for(i in c(1:nrow(goodreads))) {
+  if (goodreads[i,4] >= 0 & goodreads[i,4] < 1) {
+    rating_distribution_goodreads[1,2] = rating_distribution_goodreads[1,2] + 1 
+  }
+  if (goodreads[i,4] >= 1 & goodreads[i,4] < 2) {
+    rating_distribution_goodreads[2,2] = rating_distribution_goodreads[2,2] + 1 
+    }
+  if (goodreads[i,4] >= 2 & goodreads[i,4] < 3) {
+    rating_distribution_goodreads[3,2] = rating_distribution_goodreads[3,2] + 1 
+    }
+  if (goodreads[i,4] >= 3 & goodreads[i,4] < 4) {
+    rating_distribution_goodreads[4,2] = rating_distribution_goodreads[4,2] + 1 
+    }
+  if (goodreads[i,4] >= 4 & goodreads[i,4] < 5) {
+    rating_distribution_goodreads[5,2] = rating_distribution_goodreads[5,2] + 1 
+  }
+}
+
+rating_distribution_goodreads$percentage <- round((rating_distribution_goodreads$number_of_books)/nrow(goodreads)*100,digits = 2)
+
+rating_distribution_goodreads
+```
+
+
 ##Books with the most occurences in the dataset
 
 ```{r}
