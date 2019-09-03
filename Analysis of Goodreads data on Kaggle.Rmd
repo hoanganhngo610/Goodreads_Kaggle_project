@@ -87,7 +87,7 @@ In this part, we will answer some of the interesting exploratory questions by vi
 First, we will see the correlation between numerical columns of this dataset by using Pearson's R, Kendall rank and Spearman correlation coefficient.
   - Pearson's R correlation coefficient is used to examine the strength and direction of the linear relationship between two continuous variables.
   - Kendall rank correlation coefficient (or Kendall tau's coefficient) is a statistic used to measure the ordinal association between two measured quantities. 
-  - Spearman correlation coefficient is used to examine the strength and direction of the monotonic relationship between two continuous or ordinal variables
+  - Spearman's rank correlation coefficient (or Spearman's rho) is a non-parametric measure of rank correlation (statistical dependence between the rankings of two variables). It assesses how well the relationship between two variables can be described using a monotonic function.
 
 ```{r}
 goodreads_corr <- subset(goodreads, select = c('average_rating','num_pages','ratings_count','text_reviews_count'))
@@ -124,7 +124,7 @@ ggcorrplot(goodreads_corr_spearman_round2, hc.order = TRUE,
    colors = c("#6D9EC1", "white", "#E46726"))
 ```
 
-From the three correlation matrices above, we can see that there is only one pair of numerical variables that are strongly correlated to each other, which is ratings_count and text_reviews_count. All of the correlation coefficients of these two variables, regardless of the method used, are always greater than 0.8, which can be considered to be a strong correlation. The remaining pairs of variables show little positive to no correlation.
+From the three correlation matrices above, we can see that there is only one pair of numerical variables that are strongly correlated to each other, which is ratings_count and text_reviews_count. All of the correlation coefficients of these two variables, regardless of the method used, are always greater than 0.8, which can be considered to be a strong correlation. The remaining pairs of variables show little positive correlation, with all the remaining coefficients of less than 0.2, some are even less than 0.05.
 
 This shows an intuitive result that the more readers rate a book on a scale of 0 to 5, the more readers will leave a written text review for the same book.
 
