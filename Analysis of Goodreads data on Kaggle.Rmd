@@ -365,7 +365,112 @@ ggplot(book_language, aes(x=reorder(language,-frequency),y=frequency, fill = fac
 
 We can easily see that most of the books in this dataset is written in English. Two most used languages are English and English-US, while within 6 most commonly used languages, English and its different versions (eng-US and eng-GB) counts up to half of them. Combining all the different versions of this language, English is written in 12634 books, which is 92,12% of all the books. Apart from English, Spanish, the third commonly used language, only has 419 books, which is 3.1% of the books in this dataset. 
 
-##10 Books with the highest number of ratings count
+#10 Books with the highest average rating
+
+```{r}
+book_average_rating <- goodreads[order(-goodreads$average_rating),]
+
+book_average_rating_top10 <- book_average_rating[c(1:10),]
+book_average_rating_top10
+ggplot(data=book_average_rating_top10, aes(x=reorder(title, average_rating),y=average_rating, fill = factor(c(1:nrow(book_average_rating_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Paired") + 
+  ggtitle('Books/series with highest average rating') + 
+  labs(x = "Book/series", y = "Average rating") +
+  geom_text(
+    aes(label = average_rating), colour = "black",
+    hjust = -0.1, size = 2,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+author_highest_book_average_rating <- data.frame(table(book_average_rating_top10$authors))
+names(author_highest_book_average_rating) <- c('author', 'number_of_books')
+author_highest_book_average_rating <- author_highest_book_average_rating[order(-author_highest_book_average_rating$number_of_books),]
+author_highest_book_average_rating
+```
+
+Surprisingly, all 10 of the highest rating books have the maximum rating, 5. As a result, we will investigate all the books that have the rating of 5 in this dataset.
+
+```{r}
+books_rating_5 <- goodreads[goodreads$average_rating == 5,]
+books_rating_5 <- books_rating_5[order(-books_rating_5$ratings_count),]
+books_rating_5 
+
+print(paste('There are',nrow(books_rating_5),'books that receive an average rating of 5.'))
+```
+
+We can easily see that all of the books with average ratings of 5 receive very few ratings. The maximum ratings count among these books are 5. Specifically, there are 4 books that receive 0 ratings, and still receive an average rating of 5, which is not supposed to happen. Moreover, 23/28 books in the list receive 0 text reviews. We can not consider these books to be the ones with highest average rating, as the ratings count is too low.
+
+Instead, we propose the following method: We only consider the average rating of books with more than 1000 ratings. 
+
+```{r}
+book_1000_ratings_count <- goodreads[goodreads$ratings_count >= 1000,]
+book_1000_ratings_count <- book_1000_ratings_count[order(-book_1000_ratings_count$average_rating),]
+book_1000_ratings_count
+
+book_1000_ratings_count_top10 <- book_1000_ratings_count[c(1:10),]
+book_1000_ratings_count_top10
+ggplot(data=book_1000_ratings_count_top10, aes(x=reorder(title, average_rating),y=average_rating, fill = factor(c(1:nrow(book_1000_ratings_count_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Paired") + 
+  ggtitle('Books/series with highest average rating (ratings count >= 1000)') + 
+  labs(x = "Book/series", y = "Average rating") +
+  geom_text(
+    aes(label = average_rating), colour = "black",
+    hjust = -0.1, size = 2,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+author_book_1000_ratings_count <- data.frame(table(book_1000_ratings_count_top10$authors))
+names(author_book_1000_ratings_count) <- c('author', 'number_of_books')
+author_book_1000_ratings_count <- author_book_1000_ratings_count[order(-author_book_1000_ratings_count$number_of_books),]
+author_book_1000_ratings_count
+```
+
+We can see that, there is only 6059 books that have the ratings count of more than or equal to 1000, which accounts for 44.18% of all the books in the dataset. 
+
+Within these 6059 books, the highest has the average rating of 4.82, while the lowest rating among the top 10 books is 4.7. 
+
+Among those 10 books, half of them are written by Bill Watterson, two are from J.K. Rowling, one from Patrick O'Brian, one from Joyce Meyer and one from anonymous. We can easily see that Bill Watterson has written books that receive very high ratings from a large number of readers. Two among the top 10 from J.K Rowling are both sets of Harry Potter (one set of #1-5 and one set of #1-6). 
+
+Another interesting fact is that all books in top 10 are written in English, with one specifically written in en-US.
+
+#10 longest books in the dataset
+
+```{r}
+book_num_pages <- goodreads[order(-goodreads$num_pages),]
+
+book_num_pages_top10 <- book_num_pages[c(1:10),]
+book_num_pages_top10
+ggplot(data=book_num_pages_top10, aes(x=reorder(title, num_pages),y=num_pages, fill = factor(c(1:nrow(book_num_pages_top10))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  scale_fill_brewer(palette="Paired") + 
+  ggtitle('Books/series with highest number of pages') + 
+  labs(x = "Book/series", y = "Number of pages") +
+  geom_text(
+    aes(label = num_pages), colour = "black",
+    hjust = -0.1, size = 2,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+
+author_book_num_pages <- data.frame(table(book_num_pages_top10$authors))
+names(author_book_num_pages) <- c('author', 'number_of_books')
+author_book_num_pages <- author_book_num_pages[order(-author_book_num_pages$number_of_books),]
+author_book_num_pages
+```
+
+We can easily see that, all of the 10 longest in this dataset are all series. Among them, "The Complet Aubrey/Maturin Novels" stands out from the crowd, with its length of nearly 3 times the length of the 10th longest series, "Civil War: a Narrative". Moreover, "The Norton Anthology of English Literature" has 3 of their volumns presenting in the top 10 (Vols A-C, Vol 2 and Vol 1). However, their appearances are not consistent: Vols A-C and Vol 1 have the same name, but their number of pages are different.
+
+##10 Books with the highest number of ratings count 
 
 ```{r}
 book_ratings_count <- goodreads[order(-goodreads$ratings_count),]
