@@ -21,6 +21,7 @@ library(WVPlots)
 library(naniar)
 library(e1071)
 library(plotrix)
+library(ggcorrplot)
 ```
 
 ##Understanding the basic structure of the dataset
@@ -80,6 +81,52 @@ gg_miss_var(goodreads)
 #Exploratory Data Analysis (EDA) of the dataset Goodreads
 
 In this part, we will answer some of the interesting exploratory questions by visualizing data.
+
+##Correlation between numerical columns 
+
+First, we will see the correlation between numerical columns of this dataset by using Pearson's R, Kendall rank and Spearman correlation coefficient.
+  - Pearson's R correlation coefficient is used to examine the strength and direction of the linear relationship between two continuous variables.
+  - Kendall rank correlation coefficient (or Kendall tau's coefficient) is a statistic used to measure the ordinal association between two measured quantities. 
+  - Spearman correlation coefficient is used to examine the strength and direction of the monotonic relationship between two continuous or ordinal variables
+
+```{r}
+goodreads_corr <- subset(goodreads, select = c('average_rating','num_pages','ratings_count','text_reviews_count'))
+
+goodreads_corr_pearson_round2 <- round(cor(goodreads_corr, method = "pearson", use = "pairwise.complete.obs"), 2)
+data.frame(goodreads_corr_pearson_round2)
+
+goodreads_corr_kendall_round2 <- round(cor(goodreads_corr, method = "kendall", use = "pairwise.complete.obs"), 2)
+data.frame(goodreads_corr_kendall_round2)
+
+goodreads_corr_spearman_round2 <- round(cor(goodreads_corr, method = "spearman", use = "pairwise.complete.obs"), 2)
+data.frame(goodreads_corr_spearman_round2)
+
+ggcorrplot(goodreads_corr_pearson_round2, hc.order = TRUE,
+   lab = TRUE,
+   title = "Pearson's R correlation matrix for Goodreads numerical variables",
+   outline.col = "white",
+   ggtheme = ggplot2::theme_gray,
+   colors = c("#6D9EC1", "white", "#E46726"))
+
+
+ggcorrplot(goodreads_corr_kendall_round2, hc.order = TRUE,
+   lab = TRUE,
+   title = "Kendall correlation matrix for Goodreads numerical variables",
+   outline.col = "white",
+   ggtheme = ggplot2::theme_gray,
+   colors = c("#6D9EC1", "white", "#E46726"))
+
+ggcorrplot(goodreads_corr_spearman_round2, hc.order = TRUE,
+   lab = TRUE,
+   title = "Spearman correlation matrix for Goodreads numerical variables",
+   outline.col = "white",
+   ggtheme = ggplot2::theme_gray,
+   colors = c("#6D9EC1", "white", "#E46726"))
+```
+
+From the three correlation matrices above, we can see that there is only one pair of numerical variables that are strongly correlated to each other, which is ratings_count and text_reviews_count. All of the correlation coefficients of these two variables, regardless of the method used, are always greater than 0.8, which can be considered to be a strong correlation. The remaining pairs of variables show little positive to no correlation.
+
+This shows an intuitive result that the more readers rate a book on a scale of 0 to 5, the more readers will leave a written text review for the same book.
 
 ##Histogram plot of numerical variables
 
