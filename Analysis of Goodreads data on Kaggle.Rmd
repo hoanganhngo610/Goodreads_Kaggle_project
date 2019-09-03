@@ -22,6 +22,9 @@ library(naniar)
 library(e1071)
 library(plotrix)
 library(ggcorrplot)
+library(waffle)
+library(extrafont) 
+library(GGally)
 ```
 
 ##Understanding the basic structure of the dataset
@@ -247,7 +250,28 @@ ggplot(data = goodreads, aes(x = goodreads$text_reviews_count)) +
     geom_vline(data = goodreads, xintercept = mean(goodreads$average_rating, na.rm = TRUE), color = "red", linetype = "dashed", size = 0.5)
 ```
 
+After plotting the histograms of three variables again, we see that the ratings_count and text_reviews_count still skew heavily to the left. The mode of these two variables 0 and 3, respectively, which also add to the fact that most books receive very few ratings/reviews. 
+
+Considering number of pages, most books have the number of pages of around 175 - 325. Then, the number of book inversely proportional to the number of pages (i.e the number of books is decreasing with respect to their length).
+
+##Scatterplot of pairs of numerical variables in the dataset
+
+```{r}
+ggpairs(with(goodreads, data.frame(average_rating, num_pages, ratings_count, text_reviews_count)))
+```
+
+From this scatterplot matrix, we can see that, apart from the pairs ratings_count and text_reviews_count, the remaining shows little to no correlation. All of the scatterplot shows a nearly vertical trend line (i.e there is no linear correlation between the two variables plotted). 
+
 ##Rating distribustion of books in the dataset
+
+First, we divide the ratings into five different ranges:
+  - Between 0 and 1
+  - Between 1 and 2
+  - Between 2 and 3
+  - Between 3 and 4
+  - Between 4 and 5 
+  
+We calculate the number of books within each range, along with their percentages.
 
 ```{r}
 rating_distribution_goodreads <- data.frame(matrix(0, ncol = 3, nrow = 5))
@@ -282,6 +306,24 @@ rating_distribution_goodreads$percentage <- round((rating_distribution_goodreads
 rating_distribution_goodreads
 ```
 
+Then, we will plot two different pie charts, a traditional one and a square pie chart, to observe the distribution of books within ranges.
+
+```{r}
+ggplot(data=rating_distribution_goodreads, aes(x="", y=percentage,
+       fill = factor(rating_distribution_goodreads[,1]), )) +
+       geom_bar(width = 1, stat = "identity") + 
+       ggtitle("Pie chart of percentage of Books with respect to ratings count") + 
+       coord_polar(theta="y", start = 0) +
+       labs(fill = factor(rating_distribution_goodreads[,1]))
+
+rating_distribution_number <- c(`Between 0 and 1`= 0.25, `Between 1 and 2`= 0.02, `Between 2 and 3`= 0.53, `Between 3 and 4`= 55.32, `Between 4 and 5`= 43.69)
+
+waffle(rating_distribution_number, rows=6, 
+       colors=brewer.pal(5,"Set1"),
+       title="Percentage of Books with respect to ratings count")
+```
+
+We can see that, more than half of the books are rated between 3 and 4 points, while most the remaining books are ranked between 4 and 5. There are a total of 13577 books rated between 3 and 5, which counts up to 99% of the books in the dataset.
 
 ##Books with the most occurences in the dataset
 
@@ -304,6 +346,8 @@ Above, we have plotted the 20 books with the most appearances in the dataset. We
 
 These books are published again and again, each time with another publisher. This shows that these are still in great demand, despite the flow of time.
 
+##Languages written in books/series
+
 ```{r}
 book_language <- data.frame(table(goodreads$language_code), stringsAsFactors = FALSE)
 names(book_language) <- c('language','frequency')
@@ -318,6 +362,10 @@ ggplot(book_language, aes(x=reorder(language,-frequency),y=frequency, fill = fac
   labs(x = "Language", y = "Total number of books") +
   geom_text(aes(label=frequency), vjust=-0.5)
 ```
+
+We can easily see that most of the books in this dataset is written in English. Two most used languages are English and English-US, while within 6 most commonly used languages, English and its different versions (eng-US and eng-GB) counts up to half of them. Combining all the different versions of this language, English is written in 12634 books, which is 92,12% of all the books. Apart from English, Spanish, the third commonly used language, only has 419 books, which is 3.1% of the books in this dataset. 
+
+##10 Books with the highest number of ratings count
 
 ```{r}
 book_ratings_count <- goodreads[order(-goodreads$ratings_count),]
@@ -344,6 +392,18 @@ author_most_book_ratings_count <- author_most_book_ratings_count[order(-author_m
 author_most_book_ratings_count
 ```
 
+There is a huge gap between the first two most rated books and the remainings. Specifically speaking, there is a 2 million rating gap between Twilight #1 - the second most rated book and "The Hobbit or Three and Back Again" - the third most rated book. Even between the first position, "Harry Potter and the Sorcerer's Stone" and the second one, there is also a significant gap of about 1.3 million ratings. However, between the third and the 10th position, the gap is just about 350.000 ratings.
+
+About the authors' list of top 10 books, we can easily see that J.K Rowling and her Harry Potter series are dominating the ratings count, with 4 of her books in the series making their ways to the top 10. 
+  - Harry Potter and the Sorcerer's Stone (Harry Potter #1) at first place
+  - Harry Potter and the Prisoner of Azkaban (Harry Potter #3) at sixth place
+  - Harry Potter and the Chamber of Secrets (Harry Potter #2) at seventh place
+  - Harry Potter and the Order of the Phoenix (Harry Potter #5) at tenth place
+  
+Large number of ratings count, alongside with high average rating (all over 4.4), these definitely shows how successful this series have been.
+
+##10 Books with the highest number of ratings count
+
 ```{r}
 book_text_reviews_count <- goodreads[order(-goodreads$text_reviews_count),]
 
@@ -368,6 +428,27 @@ names(author_most_book_text_reviews_count) <- c('author', 'number_of_books')
 author_most_book_text_reviews_count <- author_most_book_text_reviews_count[order(-author_most_book_text_reviews_count$number_of_books),]
 author_most_book_text_reviews_count
 ```
+
+Once again, there is a significant gap between the first four positions; after that, the gap is getting much narrower. 
+
+Moreover, this time, the author's list of these books are more widely spread, with 10 different authors, each having one of their books in the top 10 list.
+
+We have seen some familiar names that appear in both top 10 of ratings count and text reviews count. The question is, how many of them are there, and what is the difference between their performance in these two criteria?
+
+##Common books of the two top 10 of ratings count and text reviews count
+
+```{r}
+common_top10 <- intersect(book_text_reviews_count_top10, book_ratings_count_top10)  
+common_top10
+```
+
+Although there is a very strong positive correlation between the two variables, there are only two books that belong to both top 10 of these two criteria. They are:
+  - Twilight (Twilight #1)
+  - Harry Potter and the Sorcerer's Stone (Harry Potter #1)
+
+These two books are performing extremely well in both criteria, and so far the leading books in this dataset, considering the number of ratings/reviews:
+  - With Twilight (Twilight #1): Top 2 in ratings count, Top 1 in text reviews count
+  - With Harry Potter and the Sorcerer's Stone (Harry Potter #1): Top 1 in ratings count, Top 3 in text reviews count.
 
 
 ```{r}
@@ -466,12 +547,5 @@ ggplot(data=author_most_books_high_ratings_top10_3, aes(x=reorder(author, `numbe
 x <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_books_high_ratings_top10,author_most_books_high_ratings_top10_2,author_most_books_high_ratings_top10_3))
 
 x
-```
-
-```{r}
-ScatterHist(goodreads, "average_rating", "text_reviews_count", title = "abc", binwidth_x = 0.01, binwidth_y = 100) +
-  scale_fill_manual("red") + 
-  labs(x = 'Average rating', y = "Number of ratings")
-  
 ```
 
