@@ -551,12 +551,12 @@ common_top10
 ```
 
 Although there is a very strong positive correlation between the two variables, there are only two books that belong to both top 10 of these two criteria. They are:
-  - Twilight (Twilight #1)
-  - Harry Potter and the Sorcerer's Stone (Harry Potter #1)
+  * Twilight (Twilight #1)
+  * Harry Potter and the Sorcerer's Stone (Harry Potter #1)
 
 These two books are performing extremely well in both criteria, and so far the leading books in this dataset, considering the number of ratings/reviews:
-  - With Twilight (Twilight #1): Top 2 in ratings count, Top 1 in text reviews count
-  - With Harry Potter and the Sorcerer's Stone (Harry Potter #1): Top 1 in ratings count, Top 3 in text reviews count.
+  * With Twilight (Twilight #1): Top 2 in ratings count, Top 1 in text reviews count
+  * With Harry Potter and the Sorcerer's Stone (Harry Potter #1): Top 1 in ratings count, Top 3 in text reviews count.
 
 
 ```{r}
@@ -593,6 +593,14 @@ The definition of "highly-ranked books" in this context is relative. As such, we
   - 4.3
   - 4.5
   
+```{r}
+print(paste('There are',sum(goodreads$average_rating >= 4.0),'books that have a rating of greater than or equal to 4.0, which accounts for',round(sum(goodreads$average_rating >= 4.0)/nrow(goodreads)*100, digits = 2),'percent of the books in this dataset.'))
+
+print(paste('There are',sum(goodreads$average_rating >= 4.3),'books that have a rating of greater than or equal to 4.3, which accounts for',round(sum(goodreads$average_rating >= 4.3)/nrow(goodreads)*100, digits = 2),'percent of the books in this dataset.'))
+
+print(paste('There are',sum(goodreads$average_rating >= 4.5),'books that have a rating of greater than or equal to 4.5, which accounts for',round(sum(goodreads$average_rating >= 4.5)/nrow(goodreads)*100, digits = 2),'percent of the books in this dataset.'))
+```
+
 
 ```{r}
 author_most_book_high_ratings <- goodreads[goodreads$average_rating >= 4.0,]
@@ -660,6 +668,24 @@ x <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_book
 x
 ```
 
+From the information gathered above, we can subjectively define the quality of a book based on its rating as follow:
+  * Between 4.0 and 4.3: Average/Fair 
+  * Between 4.3 and 4.5: Good 
+  * Above 4.5: Excellent
+  
+There are a total of 21 authors that appear in the three top 10 of authors who has the greatest number of books (with 3 different cutoffs). From the table above, we have the following observations:
+  * There are some authors who write a lot of above average/fair books, but only some or none of them are good or above. This means that most of their books are ranked between 4.0 and 4.3. Some authors in this group are Janet Evanovich, Mercedes Lackey, Stephen King, Rumiko Takahashi, Terry Pratchett, Agatha Christie. They are in top 10 with the 4.0 cutoff, but can not make it to top 10 with higher cutoffs.\
+      + For example, Rumiko Takahashi has 44 books ranked 4.0 or above, but he has fewer books ranked over 4.3 than Hiromu Arakawa (8 books).
+  * On the other hand, there are some authors who write fewer books, but most of their books are ranked fairly high. The two most noble names for this group are ill Watterson and J.K.Rowling. 
+      + Bill Watterson are not in top 10 with books over 4.0, but he has 16 books with ratings greater than or equal to 4.3, 15 of which has ratings greater than or equal to 4.5
+      + J.K. Rowling has 31 books above average, all of them having ratings greater than or equal to 4.3, and 10 of them has ratings greater than or equal to 4.5
+      + Hiromu Arakawa - Akira Watanabe has only 12 books whose ratings are greater than or equal to 4.3, but 11 of them have ratings greater than or equal to 4.5
+  * There are some authors who write very few books (i.e does not appear in top 10 of cutoffs 4.0 and 4.3), but most/all of their books are very highly rated (greater than or equal to 4.5).
+    + Hayao Miyazaki with 6 books rated greater than or equal to 4.5
+    + Hiromu Arakawa and Jane Austen with 4 books rated greater than or equal to 4.5
+    
+We can also see that, the distance between 4.0 and 4.3 is only 0.3, but the amount of books rated has decreased 5 times. 
+
 #Applying K-means algorithm to cluster datasets
 
 K-means clustering is the most commonly used unsupervised machine learning algorithm for partitioning a given data set into a set of k groups (i.e. k clusters), where k represents the number of groups pre-specified by the analyst.
@@ -703,4 +729,50 @@ goodreads_kmeans1_result <- goodreads %>%
 goodreads_kmeans1_result
 ```
 
-There is a problem emerging from the model above. As the ratings count is significantly larger than the average rating, this model seems to be in favor of ratings count, which may lead to bias. As a result, we will normalize the two variables and re-build this algorithm. 
+Now, we will try to apply K-means algorithm for all of the numerical variables of this dataset.
+
+```{r}
+goodreads_kmeans2 <- goodreads[,c('average_rating','num_pages','ratings_count','text_reviews_count')]
+
+set.seed(123)
+
+fviz_nbclust(goodreads_kmeans2, kmeans, method = "wss")
+
+fviz_nbclust(goodreads_kmeans2, kmeans, method = "silhouette")
+
+```
+
+After considering the elbow plot and sihouette plot, we once again come up with the optimal number of clusters of 5. As a result, we will again cluster our dataset into 5 groups.
+
+```{r}
+set.seed(123)
+final_kmeans2 <- kmeans(goodreads_kmeans2, 5, nstart = 25)
+print(final_kmeans2)
+
+fviz_cluster(final_kmeans2, data = goodreads_kmeans2)
+```
+
+Surprising enough, we receive the exactly same result as we do with only two variables, with every observation being in the same group as the first model.
+
+#Web scrapping to insert year data for books/series
+
+As we have has ISBNs associated with books, we can retrieve the year when the book was written by web-scrapping from the website \url{https://isbndb.com} as follow. 
+
+
+```{r}
+goodreads_year <- goodreads
+goodreads_year$Year <- 0
+for (i in c(1:100)) {
+  url_i <- paste('https://isbndb.com/book/',goodreads[i,'isbn'],sep = "")
+  webpage_i <- read_html(url_i)
+  year_data_html <- html_nodes(webpage_i,'td')
+  year_data <- html_text(year_data_html)
+  goodreads_year[i,'Year'] <- as.numeric(year_data[6])
+}
+goodreads_year <- goodreads[goodreads$Year >= 1900,]
+goodreads_year <- na.omit(goodreads_year)
+goodreads_year
+```
+However, this code in R may take a little while to code. As a result, we will proceed with a script in Python, takean from the "Goodreads: Analysis and Recommending Books" notebook on Kaggle.
+
+We can easily see some NAs appearing in the column "Year". This is due to the fact that the website we are scrapping data from lacks the information "year". In order to further analyze this dataset with the variable "Year", we omit all of NAs.  
