@@ -25,6 +25,9 @@ library(ggcorrplot)
 library(waffle)
 library(extrafont) 
 library(GGally)
+library(tidyverse)
+library(cluster)
+library(factoextra)
 ```
 
 ##Understanding the basic structure of the dataset
@@ -581,6 +584,8 @@ author_most_books_top10
 
 ```
 
+Once again, the first two authors creates a huge gap with the remaining. Both Agatha Christie and Stephen King have more than 65 books, which is at least 18 books more than the third author, Orson Scott Card. 
+
 ##What are the authors with the greatest number of highly-ranked books?
 The definition of "highly-ranked books" in this context is relative. As such, we consider some of the following cases. We define a book to be highly-ranked if its average ranking is greater than:
   - 4.0
@@ -652,5 +657,26 @@ ggplot(data=author_most_books_high_ratings_top10_3, aes(x=reorder(author, `numbe
 x <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_books_high_ratings_top10,author_most_books_high_ratings_top10_2,author_most_books_high_ratings_top10_3))
 
 x
+```
+
+#Applying K-means algorithm to cluster datasets
+
+```{r}
+goodreads_kmeans1 <- goodreads[,c('average_rating','ratings_count')]
+
+set.seed(123)
+
+fviz_nbclust(goodreads_kmeans1, kmeans, method = "wss")
+
+fviz_nbclust(goodreads_kmeans1, kmeans, method = "silhouette")
+```
+
+```{r}
+set.seed(123)
+final_kmeans1 <- kmeans(goodreads_kmeans1, 5, nstart = 25)
+print(final_kmeans1)
+str(final_kmeans1)
+
+fviz_cluster(final_kmeans1, data = goodreads_kmeans1)
 ```
 
