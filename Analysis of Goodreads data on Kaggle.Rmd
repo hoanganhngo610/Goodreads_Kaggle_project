@@ -587,6 +587,7 @@ author_most_books_top10
 Once again, the first two authors creates a huge gap with the remaining. Both Agatha Christie and Stephen King have more than 65 books, which is at least 18 books more than the third author, Orson Scott Card. 
 
 ##What are the authors with the greatest number of highly-ranked books?
+
 The definition of "highly-ranked books" in this context is relative. As such, we consider some of the following cases. We define a book to be highly-ranked if its average ranking is greater than:
   - 4.0
   - 4.3
@@ -661,6 +662,14 @@ x
 
 #Applying K-means algorithm to cluster datasets
 
+K-means clustering is the most commonly used unsupervised machine learning algorithm for partitioning a given data set into a set of k groups (i.e. k clusters), where k represents the number of groups pre-specified by the analyst.
+
+First, we will build a model to cluster this dataset based on two variables: average_rating and ratings_count.
+
+To determine the optimal number o clusters, we use the two following popular methods:
+  - Elbow method
+  - Sihouette method
+  
 ```{r}
 goodreads_kmeans1 <- goodreads[,c('average_rating','ratings_count')]
 
@@ -671,6 +680,8 @@ fviz_nbclust(goodreads_kmeans1, kmeans, method = "wss")
 fviz_nbclust(goodreads_kmeans1, kmeans, method = "silhouette")
 ```
 
+From both of the two approaches above, the optimal number of clusters seem to be at 5. As a result, we will perform an analysis and extract the results with 5 clusters.
+
 ```{r}
 set.seed(123)
 final_kmeans1 <- kmeans(goodreads_kmeans1, 5, nstart = 25)
@@ -680,9 +691,16 @@ str(final_kmeans1)
 fviz_cluster(final_kmeans1, data = goodreads_kmeans1)
 ```
 
+We can see that the data are clearly classified into 5 different clusters. These clusters can be ordered by ratings count (i.e, the mean ratings count of these clusters can be ordered in a increasing order with clear differences).
+
+As the rating count decreases, the average rating are more widely spread (i.e the average rating rate is higher), which means that the average rating is neither concentrated nor correct.
+
+We also can extract the clusters and add to our initial data for futher analysis at the cluster level:
+
 ```{r}
 goodreads_kmeans1_result <- goodreads %>%
                       mutate(Cluster = final_kmeans1$cluster)
 goodreads_kmeans1_result
 ```
 
+There is a problem emerging from the model above. As the ratings count is significantly larger than the average rating, this model seems to be in favor of ratings count, which may lead to bias. As a result, we will normalize the two variables and re-build this algorithm. 
