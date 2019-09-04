@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep  4 18:22:37 2019
-
-@author: ngohoanganh
-"""
-
 import numpy as np 
 import pandas as pd
 import os
@@ -25,9 +17,12 @@ import goodreads_api_client as gr
 
 df = pd.read_csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/books.csv', error_bad_lines = False)
 
-client = gr.Client(developer_key= 'fgwnppR6Q1wpFt0n6umUQ')
 
+client = gr.Client(developer_key= 'fgwnppR6Q1wpFt0n6umUQ') #If possible, please get your own? :)
 
+# Creating a function to get book details from the ISBN 13 value.
+
+#Alternate scraping solution, when both the API(s) fails
 def html(isbn):
     url = 'https://isbndb.com/book/'+isbn
     article = Article(url)
@@ -68,20 +63,14 @@ def bookdata(df):
                 
     return year
 
-def plot_author_chart(author_df):
+def new_data(author_df):
     year = bookdata(author_df)
     author_df = final_df(author_df, year)
     author_df.dropna(0, inplace=True)
     author_df = author_df[author_df['Year'].str.isnumeric()]
     author_df = author_df.set_index('title')
     author_df = author_df[author_df.Year !='0']
-    plt.figure(figsize=(15,15))
-    sns.set_context('talk')
-    plt.xticks(rotation=30)
-    ax =  sns.barplot( author_df['Year'], author_df['average_rating'], palette='deep')
-    ax.set_title("Average rating of books over time, "+ author_df.authors[1])
-    plt.xticks(rotation=30)
-    return ax
+    return author_df
 
 def final_df(df1, l):
     year_df = pd.DataFrame(l, columns=['Year'])
@@ -89,6 +78,11 @@ def final_df(df1, l):
     final = df1[['authors', 'average_rating', 'title']].join(year_df)
     return final
 
-author_df = df[df['authors']==authors[0]]
-author_df = author_df[author_df['language_code']=='eng']
-plot_author_chart(author_df)
+new_df = new_data(df)
+
+new_df.to_csv('/Users/ngohoanganh/Desktop/newfile.csv',sep='delimiter')
+
+
+
+
+

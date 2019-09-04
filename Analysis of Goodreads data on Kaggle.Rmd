@@ -28,6 +28,7 @@ library(GGally)
 library(tidyverse)
 library(cluster)
 library(factoextra)
+library(rvest)
 ```
 
 ##Understanding the basic structure of the dataset
@@ -776,3 +777,28 @@ goodreads_year
 However, this code in R may take a little while to code. As a result, we will proceed with a script in Python, takean from the "Goodreads: Analysis and Recommending Books" notebook on Kaggle.
 
 We can easily see some NAs appearing in the column "Year". This is due to the fact that the website we are scrapping data from lacks the information "year". In order to further analyze this dataset with the variable "Year", we omit all of NAs.  
+
+after retrieving the Year variable, we will proceed with the new dataset with the following graphs:
+  * Average of average_rating for each year
+  * Total number of books for each year
+  * Average ratings count of each book for each year
+  * Average text reviews count of each book for each year
+  
+##Average of average_rating of all books for each year
+```{r}
+mean_year <- aggregate(average_rating ~ Year, data = goodreads, FUN = mean)
+
+ggplot(data=mean_year, aes(x=Year,y=average_rating, fill = factor(c(1:nrow(mean_year))))) +
+  theme(legend.position = "none") + 
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle('Average of average_rating of all books for each year') + 
+  labs(x = "Books", y = "Average rating") +
+  geom_text(
+    aes(label = average_rating), colour = "black",
+    hjust = -0.1, size = 2,
+    position = position_dodge(width = 1),
+    inherit.aes = TRUE
+  )
+```
+
