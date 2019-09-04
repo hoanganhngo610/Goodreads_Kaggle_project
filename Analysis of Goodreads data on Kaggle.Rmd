@@ -680,3 +680,9 @@ str(final_kmeans1)
 fviz_cluster(final_kmeans1, data = goodreads_kmeans1)
 ```
 
+```{r}
+goodreads_kmeans1_result <- goodreads %>%
+                      mutate(Cluster = final_kmeans1$cluster)
+goodreads_kmeans1_result
+```
+
