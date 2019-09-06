@@ -65,16 +65,17 @@ print(paste('The final goodreads book dataset has',nrow(goodreads),'rows and',nc
 ```
 
 After fixing all the errors appeared in the dataset, we start to define the variables' names. Their description is as follow:
-  - **bookID**: the unique ID for each book/series
-  - **title**: the title of each book/series
-  - **authors**: the author(s) of the particular book/series
-  - **average_rating**: the average ratings of the particular book/series, given by Goodreads' users
-  - **ISBN**: old ISBN number of 10 digits, including information about a book/series, for example name, author(s), publisher, genre, etc.
-  - **ISBN13**: new ISBN number of 13 digits, introduced in 2007
-  - **Language_code**: 3-character language code, which indicates the language in which the book is written
-  - **Num_page**: number of pages of each book/series
-  - **Ratings_count**: number of ratings given by users for each book/series
-  - **Text_reviews_count**: number of text reviews (apart from point reviews of scale 5) given by users for each book/series
+
+  * **bookID**: the unique ID for each book/series
+  * **title**: the title of each book/series
+  * **authors**: the author(s) of the particular book/series
+  * **average_rating**: the average ratings of the particular book/series, given by Goodreads' users
+  * **ISBN**: old ISBN number of 10 digits, including information about a book/series, for example name, author(s), publisher, genre, etc.
+  * **ISBN13**: new ISBN number of 13 digits, introduced in 2007
+  * **Language_code**: 3-character language code, which indicates the language in which the book is written
+  * **Num_page**: number of pages of each book/series
+  * **Ratings_count**: number of ratings given by users for each book/series
+  * **Text_reviews_count**: number of text reviews (apart from point reviews of scale 5) given by users for each book/series
   
 ##Missingness of data
 We investigate whether there is any data cell missing with the vis_miss plot. Since we do not plot any significant in the plot, and it shows that less than 0.1% of the data is missing, we use gg_miss_var to get the exact number of data cells missing in each column. The result is, surprisingly, there is no data misising.
@@ -82,7 +83,6 @@ We investigate whether there is any data cell missing with the vis_miss plot. Si
 ```{r}
 vis_miss(goodreads)
 gg_miss_var(goodreads)
-
 ```
   
 #Exploratory Data Analysis (EDA) of the dataset Goodreads
@@ -92,9 +92,10 @@ In this part, we will answer some of the interesting exploratory questions by vi
 ##Correlation between numerical columns 
 
 First, we will see the correlation between numerical columns of this dataset by using Pearson's R, Kendall rank and Spearman correlation coefficient.
-  - Pearson's R correlation coefficient is used to examine the strength and direction of the linear relationship between two continuous variables.
-  - Kendall rank correlation coefficient (or Kendall tau's coefficient) is a statistic used to measure the ordinal association between two measured quantities. 
-  - Spearman's rank correlation coefficient (or Spearman's rho) is a non-parametric measure of rank correlation (statistical dependence between the rankings of two variables). It assesses how well the relationship between two variables can be described using a monotonic function.
+
+  * Pearson's R correlation coefficient is used to examine the strength and direction of the linear relationship between two continuous variables.
+  * Kendall rank correlation coefficient (or Kendall tau's coefficient) is a statistic used to measure the ordinal association between two measured quantities. 
+  * Spearman's rank correlation coefficient (or Spearman's rho) is a non-parametric measure of rank correlation (statistical dependence between the rankings of two variables). It assesses how well the relationship between two variables can be described using a monotonic function.
 
 ```{r}
 goodreads_corr <- subset(goodreads, select = c('average_rating','num_pages','ratings_count','text_reviews_count'))
@@ -269,11 +270,12 @@ From this scatterplot matrix, we can see that, apart from the pairs ratings_coun
 ##Rating distribustion of books in the dataset
 
 First, we divide the ratings into five different ranges:
-  - Between 0 and 1
-  - Between 1 and 2
-  - Between 2 and 3
-  - Between 3 and 4
-  - Between 4 and 5 
+
+  * Between 0 and 1
+  * Between 1 and 2
+  * Between 2 and 3
+  * Between 3 and 4
+  * Between 4 and 5 
   
 We calculate the number of books within each range, along with their percentages.
 
@@ -486,7 +488,7 @@ ggplot(data=book_ratings_count_top10, aes(x=reorder(title, ratings_count),y=rati
   geom_bar(stat="identity") +
   coord_flip() +
   scale_fill_brewer(palette="Paired") + 
-  ggtitle('Books/series with highest number of ratings') + 
+  ggtitle('Books/series with highest number of ratings count') + 
   labs(x = "Book/series", y = "Number of ratings") +
   geom_text(
     aes(label = ratings_count), colour = "black",
@@ -552,10 +554,12 @@ common_top10
 ```
 
 Although there is a very strong positive correlation between the two variables, there are only two books that belong to both top 10 of these two criteria. They are:
+
   * Twilight (Twilight #1)
   * Harry Potter and the Sorcerer's Stone (Harry Potter #1)
 
 These two books are performing extremely well in both criteria, and so far the leading books in this dataset, considering the number of ratings/reviews:
+
   * With Twilight (Twilight #1): Top 2 in ratings count, Top 1 in text reviews count
   * With Harry Potter and the Sorcerer's Stone (Harry Potter #1): Top 1 in ratings count, Top 3 in text reviews count.
 
@@ -590,6 +594,7 @@ Once again, the first two authors creates a huge gap with the remaining. Both Ag
 ##What are the authors with the greatest number of highly-ranked books?
 
 The definition of "highly-ranked books" in this context is relative. As such, we consider some of the following cases. We define a book to be highly-ranked if its average ranking is greater than:
+
   - 4.0
   - 4.3
   - 4.5
@@ -664,18 +669,20 @@ ggplot(data=author_most_books_high_ratings_top10_3, aes(x=reorder(author, `numbe
     inherit.aes = TRUE
   )
 
-x <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_books_high_ratings_top10,author_most_books_high_ratings_top10_2,author_most_books_high_ratings_top10_3))
+list_authors_top10s <- Reduce(function(x,y) merge(x,y,by="author",all=TRUE) ,list(author_most_books_high_ratings_top10,author_most_books_high_ratings_top10_2,author_most_books_high_ratings_top10_3))
 
-x
+list_authors_top10s
 ```
 
 From the information gathered above, we can subjectively define the quality of a book based on its rating as follow:
+
   * Between 4.0 and 4.3: Average/Fair 
   * Between 4.3 and 4.5: Good 
   * Above 4.5: Excellent
   
 There are a total of 21 authors that appear in the three top 10 of authors who has the greatest number of books (with 3 different cutoffs). From the table above, we have the following observations:
-  * There are some authors who write a lot of above average/fair books, but only some or none of them are good or above. This means that most of their books are ranked between 4.0 and 4.3. Some authors in this group are Janet Evanovich, Mercedes Lackey, Stephen King, Rumiko Takahashi, Terry Pratchett, Agatha Christie. They are in top 10 with the 4.0 cutoff, but can not make it to top 10 with higher cutoffs.\
+
+  * There are some authors who write a lot of above average/fair books, but only some or none of them are good or above. This means that most of their books are ranked between 4.0 and 4.3. Some authors in this group are Janet Evanovich, Mercedes Lackey, Stephen King, Rumiko Takahashi, Terry Pratchett, Agatha Christie. They are in top 10 with the 4.0 cutoff, but can not make it to top 10 with higher cutoffs.
       + For example, Rumiko Takahashi has 44 books ranked 4.0 or above, but he has fewer books ranked over 4.3 than Hiromu Arakawa (8 books).
   * On the other hand, there are some authors who write fewer books, but most of their books are ranked fairly high. The two most noble names for this group are ill Watterson and J.K.Rowling. 
       + Bill Watterson are not in top 10 with books over 4.0, but he has 16 books with ratings greater than or equal to 4.3, 15 of which has ratings greater than or equal to 4.5
@@ -694,8 +701,9 @@ K-means clustering is the most commonly used unsupervised machine learning algor
 First, we will build a model to cluster this dataset based on two variables: average_rating and ratings_count.
 
 To determine the optimal number o clusters, we use the two following popular methods:
-  - Elbow method
-  - Sihouette method
+
+  * Elbow method
+  * Sihouette method
   
 ```{r}
 goodreads_kmeans1 <- goodreads[,c('average_rating','ratings_count')]
@@ -759,7 +767,6 @@ Surprising enough, we receive the exactly same result as we do with only two var
 
 As we have has ISBNs associated with books, we can retrieve the year when the book was written by web-scrapping from the website \url{https://isbndb.com} as follow. 
 
-
 ```{r}
 goodreads_year <- goodreads
 goodreads_year$Year <- 0
@@ -774,31 +781,103 @@ goodreads_year <- goodreads[goodreads$Year >= 1900,]
 goodreads_year <- na.omit(goodreads_year)
 goodreads_year
 ```
+
 However, this code in R may take a little while to code. As a result, we will proceed with a script in Python, takean from the "Goodreads: Analysis and Recommending Books" notebook on Kaggle.
 
 We can easily see some NAs appearing in the column "Year". This is due to the fact that the website we are scrapping data from lacks the information "year". In order to further analyze this dataset with the variable "Year", we omit all of NAs.  
 
-after retrieving the Year variable, we will proceed with the new dataset with the following graphs:
-  * Average of average_rating for each year
-  * Total number of books for each year
-  * Average ratings count of each book for each year
-  * Average text reviews count of each book for each year
+However, instead of doing web-scrapping with R, we decided to use a much more effective tool, Python. The Python code for webscrapping can be found within the same file of this notebook. After running the Python script, we save the csv file as goodreads_year.csv, with encoding "UTF-16". We import the file as follow.
   
-##Average of average_rating of all books for each year
 ```{r}
-mean_year <- aggregate(average_rating ~ Year, data = goodreads, FUN = mean)
-
-ggplot(data=mean_year, aes(x=Year,y=average_rating, fill = factor(c(1:nrow(mean_year))))) +
-  theme(legend.position = "none") + 
-  geom_bar(stat="identity") +
-  coord_flip() +
-  ggtitle('Average of average_rating of all books for each year') + 
-  labs(x = "Books", y = "Average rating") +
-  geom_text(
-    aes(label = average_rating), colour = "black",
-    hjust = -0.1, size = 2,
-    position = position_dodge(width = 1),
-    inherit.aes = TRUE
-  )
+goodreads_year <- read.csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/goodreads_year.csv', stringsAsFactor = FALSE, fileEncoding = "UTF-16")
+str(goodreads_year)
+print(paste('There are',nrow(goodreads_year),'books whose `Year` attribute can be retrieved, which accounts for',round(nrow(goodreads_year)/nrow(goodreads)*100, digits = 2),'eprcent of the original dataset.'))
 ```
 
+After retrieving the Year variable, we will proceed to analyse the new dataset with the following graphs:
+
+  * Average of average_rating for each year
+  * Total number of books for each year
+  * Total ratings count and average ratings count for each book of each year
+  * Total text reviews count and average text reviews count of each book for each year
+  
+##Average of average_rating of all books for each year
+
+```{r}
+mean_year <- aggregate(average_rating ~ Year, data = goodreads_year, FUN = mean)
+mean_year
+
+ggplot(data = mean_year, aes(x = Year, y = average_rating)) +
+  geom_line(color = "#FC4E07", size = 1) +
+  labs(x = "Year", y = "Average rating", title = "Average rating for each year") + 
+  geom_smooth(method = "lm")
+
+goodreads_year[goodreads_year$Year == 1922,]
+goodreads_year[goodreads_year$Year == 1931,]
+```
+
+From the graph, we can see two opposite peaks appearing:
+
+  *Maximum peak: The average ratings of books written in 1922 reached the peak of 5.0. After re-checking with the data retrieved, there is only one book written in 1922. Moreover, this book received 0 rating and 0 text review. 
+  * Minimum peak: The average ratings of books reached its lowest in 1931 with the average of 2.75, then gradually recover until 1940. As expected, in 1931, there is only one book written, with 4 ratings and 0 text review.
+  
+Apart from the peaks mentioned above, there is no other abnormal points within the graph. For the remaining years, the average rating fluctuate around 4.0.
+
+##Total books of each year
+
+```{r}
+total_books_year <- goodreads_year %>% count(Year)
+names(total_books_year) <- c('Year','number_of_books')
+total_books_year
+
+ggplot(data = total_books_year, aes(x = Year, y = number_of_books)) + 
+  geom_line(color = "#00AFBB", size = 1) +
+  labs(x = "Year", y = "Total number of books", title = "Number of books written for each year") + 
+  geom_smooth(method = "lm")
+```
+
+We can easily see that, before 1975, there are not many books written in each year. However, after that timestamp, the books published every year start to increase gradually, and skyrocketted between 1990 and 2006. After reaching its peak, the number of books suddenly dropped significantly, and since 2016, there are less than 10 new books written each year.
+
+#Total ratings count and average ratings count for each book of each year
+
+```{r}
+sum_ratings_count_year <- aggregate(ratings_count ~ Year, data = goodreads_year, FUN = sum)
+sum_ratings_count_year
+
+ggplot(data = sum_ratings_count_year, aes(x = Year, y = ratings_count)) +
+  geom_line(color = "purple", size = 1) +
+  labs(x = "Year", y = "Total ratings count", title = "Total ratings count of all books for each year") + 
+  geom_smooth(method = "lm")
+
+average_ratings_count_year <- aggregate(ratings_count ~ Year, data = goodreads_year, FUN = mean)
+average_ratings_count_year
+
+ggplot(data = average_ratings_count_year, aes(x = Year, y = ratings_count)) +
+  geom_line(color = "purple", size = 1) +
+  labs(x = "Year", y = "Average ratings count", title = "Average ratings count of each book for each year") + 
+  geom_smooth(method = "lm")
+```
+
+The total number of ratings each year seems to follow the pattern of the number of books published each year. However, the average ratings count for each book each year does not. We can see two greatest peaks of around 60,000 ratings in 1952 and 2019, along with various other smaller peaks. The average does not seem to follow any pattern.
+
+#Total text reviews count and average text reviews count for each book of each year
+
+```{r}
+sum_text_reviews_count_year <- aggregate(text_reviews_count ~ Year, data = goodreads_year, FUN = sum)
+sum_text_reviews_count_year
+
+ggplot(data = sum_text_reviews_count_year, aes(x = Year, y = text_reviews_count)) +
+  geom_line(color = "#9ACD32", size = 1) +
+  labs(x = "Year", y = "Total ratings count", title = "Total text reviews count of all books for each year") + 
+  geom_smooth(method = "lm")
+
+average_text_reviews_count_year <- aggregate(text_reviews_count ~ Year, data = goodreads_year, FUN = mean)
+average_text_reviews_count_year
+
+ggplot(data = average_text_reviews_count_year, aes(x = Year, y = text_reviews_count)) +
+  geom_line(color = "#9ACD32", size = 1) +
+  labs(x = "Year", y = "Average text reviews count", title = "Average text reviews count of each book for each year") +
+  geom_smooth(method = "lm")
+```
+
+Once again, the total number of text reviews count each year seems to follow the pattern of the number of books written each year. The average reviews count for each book each year reaches it peak in 2019, also along with some other smaller peaks. This time, we can observe that there is an overall increasing trend with respect to time, which means that as time goes, people are leaving more and more text reviews.
