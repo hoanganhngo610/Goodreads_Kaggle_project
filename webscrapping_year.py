@@ -58,6 +58,8 @@ def new_data(df):
 
 goodreads_year = new_data(goodreads)
 
+goodreads_year = goodreads_year[(goodreads_year.Year >= 1900) & (goodreads_year.Year <= 2019)]
+
 goodreads_year.to_csv('/Users/ngohoanganh/Desktop/Goodreads Kaggle project/goodreads_year.csv', sep=',', encoding = 'UTF-16', index = False)
 
 
