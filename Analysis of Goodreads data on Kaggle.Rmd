@@ -607,9 +607,9 @@ Once again, the first two authors creates a huge gap with the remaining. Both Ag
 
 The definition of "highly-ranked books" in this context is relative. As such, we consider some of the following cases. We define a book to be highly-ranked if its average ranking is greater than:
 
-  - 4.0
-  - 4.3
-  - 4.5
+  * 4.0
+  * 4.3
+  * 4.5
   
 ```{r}
 print(paste('There are',sum(goodreads$average_rating >= 4.0),'books that have a rating of greater than or equal to 4.0, which accounts for',round(sum(goodreads$average_rating >= 4.0)/nrow(goodreads)*100, digits = 2),'percent of the books in this dataset.'))
@@ -830,7 +830,7 @@ goodreads_year[goodreads_year$Year == 1931,]
 
 From the graph, we can see two opposite peaks appearing:
 
-  *Maximum peak: The average ratings of books written in 1922 reached the peak of 5.0. After re-checking with the data retrieved, there is only one book written in 1922. Moreover, this book received 0 rating and 0 text review. 
+  * Maximum peak: The average ratings of books written in 1922 reached the peak of 5.0. After re-checking with the data retrieved, there is only one book written in 1922. Moreover, this book received 0 rating and 0 text review. 
   * Minimum peak: The average ratings of books reached its lowest in 1931 with the average of 2.75, then gradually recover until 1940. As expected, in 1931, there is only one book written, with 4 ratings and 0 text review.
   
 Apart from the peaks mentioned above, there is no other abnormal points within the graph. For the remaining years, the average rating fluctuate around 4.0.
