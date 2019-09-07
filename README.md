@@ -1,6 +1,6 @@
 # Goodreads_Kaggle_project
 
-## verview
+## Overview
 
 First of all, we will mention a bit about the owner of this dataset, Goodreads . Goodreads is a social cataloging website that allows individuals to freely search its database of books, annotations, and reviews.
 
