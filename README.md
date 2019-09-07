@@ -1,6 +1,6 @@
 # Goodreads_Kaggle_project
 
-#Overview
+## verview
 
 First of all, we will mention a bit about the owner of this dataset, Goodreads . Goodreads is a social cataloging website that allows individuals to freely search its database of books, annotations, and reviews.
 
@@ -10,7 +10,7 @@ This project is made possible by user **Soumik** on Kaggle, along with the wonde
 
 All of the datasets and scripts used will be uploaded along with this notebook. 
 
-#Structure
+## Structure
 
 This project includes the following parts:
 
@@ -20,4 +20,4 @@ This project includes the following parts:
   * books.csv: The original Goodreads data on Kaggle
   * goodreads_year.csv: The data exported from webscrapping_year.py
   
- I hope you will enjoy this project as much as I do! If you have any message or comment, please do not hesitate to contact me via \email{hoang-anh.ngo@polytechnique.edu}. Any of your response will be much appreciated.
+ I hope you will enjoy this project as much as I do! If you have any message or comment, please do not hesitate to contact me via hoang-anh.ngo@polytechnique.edu. Any of your response will be much appreciated.
