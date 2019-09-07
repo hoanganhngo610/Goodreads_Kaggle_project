@@ -1,10 +1,22 @@
 ---
 title: "Analysis of Goodreads data on Kaggle"
 author:
-  - name: Hoang Anh NGO
-  - affiliation: Ecole Polytechnique, IP Paris
+  - Hoang Anh NGO:
+      email: hoang-anh.ngo@polytechnique.edu
+      institute: École Polytechnique, IP Paris
+      correspondence: true
 output: html_notebook
 ---
+
+#Overview
+
+First of all, we will mention a bit about the owner of this dataset, Goodreads . Goodreads is a social cataloging website that allows individuals to freely search its database of books, annotations, and reviews.
+
+This project aims to have an insight about different numerical parameters of the book and their relationship. Moreoever, alongside with the informaion given, we try to do a bit of web-scrapping and get another attribute (in this case, 'Year') in order to take our analysis further. Moreover, this would be my first milestone into Data Analysis, using all the skills and knowledges I have acquired during my summer time working with R.
+
+This project is made possible by user **Soumik** on Kaggle, along with the wonderful reference from the Python notebook named **Goodreads: Analysis and Recommending Books** of *Shivam Ralli*. I would like to send my sincere thanks to both of them.
+
+All of the datasets and scripts used will be uploaded along with this notebook. 
 
 #Loading libraries and understanding the basics of this dataset
 
@@ -767,7 +779,7 @@ Surprising enough, we receive the exactly same result as we do with only two var
 
 As we have has ISBNs associated with books, we can retrieve the year when the book was written by web-scrapping from the website \url{https://isbndb.com} as follow. 
 
-```{r}
+```{r, eval=F, echo=T}
 goodreads_year <- goodreads
 goodreads_year$Year <- 0
 for (i in c(1:100)) {
